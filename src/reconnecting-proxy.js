@@ -77,7 +77,7 @@ export default class ReconnectingProxy extends Emitter {
       .on("status", (status) => this.emit("status", status))
       .on("delete", (status) => this.emit("delete", status))
       .on("friends", (friends) => this.emit("friends", friends))
-      // ...
+      .on("favorite", (event) => this.emit("favorite", event))
       .on("error", (err) => this.reconnect(err));
 
     this.setReconnectingCheckTimer();
