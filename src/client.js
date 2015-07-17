@@ -242,7 +242,7 @@ export default class TwitterStreamingClient extends Emitter {
 
   // Override
   emit(event, ...args) {
-    log(`${event} emitted`)
+    log(`${event} emitted`);
     super.emit.apply(this, [event].concat(args));
     return this;
   }
