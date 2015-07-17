@@ -65,11 +65,13 @@ export default class ReconnectingProxy extends Emitter {
 
   open(params) {
     this.client.open(params)
-      .on("response", () => {
+      .on("response", (...args) => {
         if (this.reconnectingTimer) {
           clearTimeout(this.reconnectingTimer);
           this.reconnectingTimer = null;
         }
+
+        this.emit("response", args);
       })
       .on("data", () => this.setLastDataTimestamp())
       .on("status", (status) => this.emit("status", status))
