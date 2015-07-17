@@ -1,5 +1,7 @@
 # twitter-streaming-client
 
+[![Build Status](https://travis-ci.org/p-baleine/twitter-streaming-client.svg?branch=master)](https://travis-ci.org/p-baleine/twitter-streaming-client)
+
 Twitter Streaming API Client.
 
 ## Installation
