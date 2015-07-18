@@ -15,9 +15,9 @@ var oauth = {
 // received statuses
 
 var keywords = {
-  "rust": { color: "magenta", re: /rust/ },
-  "golang": { color: "green", re: /golang/ },
-  "julia": { color: "cyan", re: /julia/ }
+  "rust": { color: "magenta", re: /rust/im },
+  "golang": { color: "green", re: /golang/im },
+  "julia": { color: "cyan", re: /julia/im }
 }
 
 function printStatus(key, status) {
