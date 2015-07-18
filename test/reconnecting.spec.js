@@ -5,6 +5,8 @@ import ReconnectingProxy from "../src/reconnecting-proxy";
 import sinon from "sinon";
 import TwitterStreamClient from "../src/client";
 
+// This test intends for integration test.
+
 // Dummy response class to test delayed response.
 class DelayedResponse extends Readable {
   constructor(interval) {

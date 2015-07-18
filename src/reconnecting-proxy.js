@@ -79,7 +79,11 @@ export default class ReconnectingProxy extends Emitter {
       .on("delete", (status) => this.emit("delete", status))
       .on("friends", (friends) => this.emit("friends", friends))
       .on("favorite", (event) => this.emit("favorite", event))
-      .on("error", (err) => this.reconnect(err));
+      .on("error", (err) => {
+        this.client
+          .once("end", () => this.reconnect(err))
+          .close();
+      });
 
     this.setReconnectingCheckTimer();
 
@@ -124,6 +128,10 @@ export default class ReconnectingProxy extends Emitter {
       return this.close();
     }
 
+    if (err) {
+      log(`${err} occurred`);
+    }
+
     if (this.reconnectingTriedCount > this.reconnectingMaxCount) {
       log(`reconnecting tried ${this.reconnectingMaxCount}, abort`);
       this.emit("error", this.lastError);
@@ -135,17 +143,27 @@ export default class ReconnectingProxy extends Emitter {
       this.reconnectingCheckTimer = void 0;
     }
 
+    var [interval, maxCount] = this.getBackoffStrategySpec(err);
     var delay;
 
     if (this.reconnectingTimer) {
       clearTimeout(this.reconnectingTimer);
-      this.reconnectingTriedCount += 1;
-      delay = this.reconnectingInterval * Math.pow(2, this.reconnectingTriedCount - 1);
+
+      if (interval > this.reconnectingInterval) {
+        // if the interval calculated newly exceeds
+        // `this.reconnectingInterval`, use this.
+        this.reconnectingInterval = interval;
+        this.reconnectingMaxCount = maxCount;
+        this.reconnectingTriedCount = 0;
+        delay = 0;
+      } else {
+        this.reconnectingTriedCount += 1;
+        delay = this.reconnectingInterval * Math.pow(2, this.reconnectingTriedCount - 1);
+      }
     } else {
-      this.lastError = err;
+      this.reconnectingInterval = interval;
+      this.reconnectingMaxCount = maxCount;
       this.reconnectingTriedCount = 0;
-      [this.reconnectingInterval, this.reconnectingMaxCount] =
-        this.getBackoffStrategySpec(err);
       delay = 0;
     }
 
