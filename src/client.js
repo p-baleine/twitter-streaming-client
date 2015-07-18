@@ -2,6 +2,7 @@ import debug from "debug";
 import Emitter from "component-emitter";
 import {extend} from "./util";
 import request from "request";
+import TwitterDisconnectError from "./twitter-disconnect-error";
 import TwitterRateLimitError from "./twitter-rate-limit-error";
 import url from "url";
 
@@ -235,6 +236,8 @@ export default class TwitterStreamingClient extends Emitter {
       if (message.event === "favorite") {
         this.emit("favorite", message);
       }
+    } else if (message.disconnect) {
+      this.emit("error", new TwitterDisconnectError(message.disconnect));
     }
 
     return this;

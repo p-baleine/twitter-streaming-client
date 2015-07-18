@@ -3,6 +3,7 @@ import expect from "expect.js";
 import fs from "fs";
 import request from "request";
 import sinon from "sinon";
+import TwitterDisconnectError from "../src/twitter-disconnect-error";
 import TwitterRateLimitError from "../src/twitter-rate-limit-error";
 import TwitterStreamingClient from "../src/client";
 
@@ -118,6 +119,35 @@ describe("TwitterStreamingClient", () => {
         this.fakeRequest.emit("data", "35\r\n{\"event\":\"favorite\",\"target\":\"123\"}");
 
         expect(onFavorite.callCount).to.equal(1);
+      });
+
+      describe("when `disconnect` messages are received", () => {
+        it("should emit `error` events", function() {
+          var onError = sinon.spy();
+          var client = new TwitterStreamingClient("http://google.com", {});
+
+          client.on("error", onError);
+          client.open();
+
+          this.fakeRequest.emit("data", "25\r\n{\"disconnect\":{\"code\":4}}");
+
+          expect(onError.callCount).to.equal(1);
+        });
+
+        it("should emit a `TwitterDisconnectError` instance", function() {
+          var onError = sinon.spy();
+          var client = new TwitterStreamingClient("http://google.com", {});
+
+          client.on("error", onError);
+          client.open();
+
+          this.fakeRequest.emit("data", "25\r\n{\"disconnect\":{\"code\":4}}");
+
+          var arg = onError.firstCall.args[0];
+
+          expect(arg).to.be.a(TwitterDisconnectError);
+          expect(arg.message).to.match(/Stall/);
+        });
       });
     });
 

@@ -1,5 +1,6 @@
 import debug from "debug";
 import Emitter from "component-emitter";
+import TwitterDisconnectError from "./twitter-disconnect-error";
 import TwitterRateLimitError from "./twitter-rate-limit-error";
 
 var log = debug("twitter-streaming-client");
@@ -174,6 +175,10 @@ export default class ReconnectingProxy extends Emitter {
 
     if (err instanceof TwitterRateLimitError) {
       strategy = this.backoffStrategies.rate_limit_errors;
+    }
+
+    if (err instanceof TwitterDisconnectError) {
+      strategy = this.backoffStrategies.http_errors;
     }
 
     if (!strategy || !strategy.interval || !strategy.max_count) {
